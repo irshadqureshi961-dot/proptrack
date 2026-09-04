@@ -24,10 +24,10 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Install Dependencies
+      - name: Fetch Dependencies
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build Android APK
         run: flutter build apk --release
 
       - name: Upload APK Artifact
