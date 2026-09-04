@@ -46,7 +46,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildStatCard('Account Balance', '\$${accountBalance.toStringAsFixed(2)}', Colors.white),
             const SizedBox(height: 12),
