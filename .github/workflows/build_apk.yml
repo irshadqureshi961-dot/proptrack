@@ -24,7 +24,7 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Fetch Dependencies
+      - name: Install Dependencies
         run: flutter pub get
 
       - name: Build Android APK
