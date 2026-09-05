@@ -1,36 +1,60 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'features/auth/screens/login_screen.dart';
+import 'features/dashboard/screens/dashboard_screen.dart';
+import 'features/calculator/screens/calculator_screen.dart';
+import 'features/journal/screens/journal_screen.dart';
 
-const String supabaseUrl = 'https://mqzxkajzyiksibqnkbxa.supabase.co';
-const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xenhrYWp6eWlrc2licW5rYnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1NzgwNjgsImV4cCI6MjEwNDE1NDA2OH0.AtGDyw5LdS7taQeU3qdY5mIdUWDkRX4AwFwHuRFeiTE';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
-  );
-
-  runApp(const MyApp());
+void main() {
+  runApp(const PropTrackApp());
 }
 
-final supabase = Supabase.instance.client;
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class PropTrackApp extends StatelessWidget {
+  const PropTrackApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PropTrack',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF0B0E14),
       ),
-      home: const LoginScreen(),
+      home: const MainNavigationScreen(),
+    );
+  }
+}
+
+class MainNavigationScreen extends StatefulWidget {
+  const MainNavigationScreen({super.key});
+
+  @override
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+}
+
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    const DashboardScreen(),
+    const CalculatorScreen(),
+    const JournalScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        backgroundColor: const Color(0xFF121824),
+        selectedItemColor: const Color(0xFF00E676),
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Dashboard'),
+          BottomNavigationBarItem(icon: Icon(Icons.calculate), label: 'Calculator'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Journal'),
+        ],
+      ),
     );
   }
 }
