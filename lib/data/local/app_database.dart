@@ -3,7 +3,17 @@ import 'package:drift/native.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [])
+class Accounts extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+}
+
+class Trades extends Table {
+  TextColumn get id => text()();
+  TextColumn get accountId => text()();
+}
+
+@DriftDatabase(tables: [Accounts, Trades])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(NativeDatabase.memory());
 
