@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../trades/widgets/log_trade_sheet.dart';
-import '../calculator/calculator_screen.dart';
-import '../journal/journal_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -11,205 +9,193 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedIndex = 0;
-  double _equity = 104250.00;
+  double startingBalance = 100000.0;
+  double currentEquity = 104250.0;
+  double maxDailyLossLimit = 5000.0;
+  double profitTargetLimit = 10000.0;
+  double todayLoss = 0.0;
 
-  final List<Map<String, dynamic>> _trades = [
-    {'symbol': 'EURUSD', 'type': 'BUY', 'size': '1.5 Lots', 'pnl': '+\$620.00', 'isProfit': true, 'numericPnl': 620.0},
-    {'symbol': 'XAUUSD', 'type': 'SELL', 'size': '0.5 Lots', 'pnl': '-\$180.00', 'isProfit': false, 'numericPnl': -180.0},
-    {'symbol': 'GBPUSD', 'type': 'BUY', 'size': '2.0 Lots', 'pnl': '+\$1,100.00', 'isProfit': true, 'numericPnl': 1100.0},
-  ];
+  List<Map<String, dynamic>> loggedTrades = [];
 
-  void _openLogTradeSheet() {
+  void _addNewTrade(Map<String, dynamic> trade) {
+    setState(() {
+      loggedTrades.add(trade);
+      double pnl = trade['pnl'] ?? 0.0;
+      currentEquity += pnl;
+
+      if (pnl < 0) {
+        todayLoss += pnl.abs();
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Trade for ${trade['symbol']} logged successfully!'),
+        backgroundColor: const Color(0xFF00E676),
+      ),
+    );
+  }
+
+  void _openLogTradeModal() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => LogTradeSheet(
-        onTradeAdded: (newTrade) {
-          setState(() {
-            _trades.insert(0, newTrade);
-            _equity += (newTrade['numericPnl'] as double);
-          });
-        },
+      builder: (context) => LogTradeSheet(
+        onTradeAdded: _addNewTrade,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    double totalPnL = currentEquity - startingBalance;
+    double pnlPercent = (totalPnL / startingBalance) * 100;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0E14),
+      backgroundColor: const Color(0xFF0A0E17),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF121824),
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
+        title: Row(
+          children: [
+            const Text(
               'FTMO \$100K Challenge',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
-            Text(
-              'Account #849201 • Active',
-              style: TextStyle(fontSize: 12, color: Color(0xFF00E676)),
+            const Icon(Icons.arrow_drop_down, color: Colors.white),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline, color: Color(0xFF00E676)),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Status Chip
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Text(
+                '2 Step • Equity based • Active',
+                style: TextStyle(color: Color(0xFF00E676), fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Main Balance Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF121824),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Starting Balance', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          Text('\$${startingBalance.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text('Current Equity', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          Text('\$${currentEquity.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'P/L: ${totalPnL >= 0 ? '+' : ''}\$${totalPnL.toStringAsFixed(2)} (${pnlPercent.toStringAsFixed(2)}%)',
+                        style: TextStyle(
+                          color: totalPnL >= 0 ? const Color(0xFF00E676) : Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text('Start: 2026-08-01', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            const Text('Risk & Objectives', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+
+            // Daily Loss Progress
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF121824),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Max Daily Loss (5.0%)', style: TextStyle(color: Colors.white)),
+                  Text('\$${todayLoss.toStringAsFixed(0)} / \$${maxDailyLossLimit.toStringAsFixed(0)}', style: const TextStyle(color: Colors.grey)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Profit Target Progress
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF121824),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Profit Target', style: TextStyle(color: Colors.white)),
+                      Text('\$${totalPnL > 0 ? totalPnL.toStringAsFixed(0) : '0'} / \$${profitTargetLimit.toStringAsFixed(0)}', style: const TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    value: (totalPnL / profitTargetLimit).clamp(0.0, 1.0),
+                    backgroundColor: Colors.grey.withOpacity(0.2),
+                    color: const Color(0xFF00E676),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          _buildDashboardView(),
-          const CalculatorScreen(),
-          JournalScreen(trades: _trades),
-        ],
-      ),
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton.extended(
-              onPressed: _openLogTradeSheet,
-              backgroundColor: const Color(0xFF00E676),
-              foregroundColor: Colors.black,
-              icon: const Icon(Icons.add),
-              label: const Text('Log Trade', style: TextStyle(fontWeight: FontWeight.bold)),
-            )
-          : null,
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF121824),
-        selectedItemColor: const Color(0xFF00E676),
-        unselectedItemColor: Colors.grey,
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.calculate_outlined), label: 'Calculator'),
-          BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'Journal'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDashboardView() {
-    final netPnl = _equity - 100000.0;
-    final pnlPercent = (netPnl / 100000.0) * 100;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xFF121824),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF1E2638)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Current Equity', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                const SizedBox(height: 6),
-                Text(
-                  '\$${_equity.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildMetricTile(
-                      'Profit / Loss',
-                      '${netPnl >= 0 ? '+' : ''}\$${netPnl.toStringAsFixed(2)} (${pnlPercent.toStringAsFixed(2)}%)',
-                      netPnl >= 0 ? const Color(0xFF00E676) : const Color(0xFFFF5252),
-                    ),
-                    _buildMetricTile('Max Drawdown', '1.8% / 10.0%', Colors.orangeAccent),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Text('Risk & Objectives', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-          const SizedBox(height: 12),
-          _buildProgressBar('Max Daily Loss', 0.35, '\$350 / \$5,000 (0.7%)', const Color(0xFF00E676)),
-          const SizedBox(height: 12),
-          _buildProgressBar('Profit Target', (netPnl / 10000).clamp(0.0, 1.0), '\$${netPnl.toStringAsFixed(0)} / \$10,000', const Color(0xFF00E676)),
-          const SizedBox(height: 24),
-          const Text('Recent Trades', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-          const SizedBox(height: 12),
-          ..._trades.map((t) => _buildTradeCard(t['symbol'], t['type'], t['size'], t['pnl'], t['isProfit'])).toList(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetricTile(String label, String value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        const SizedBox(height: 4),
-        Text(value, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14)),
-      ],
-    );
-  }
-
-  Widget _buildProgressBar(String title, double progress, String subtext, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF121824),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1E2638)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              Text(subtext, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: const Color(0xFF1E2638),
-            color: color,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTradeCard(String symbol, String type, String size, String pnl, bool isProfit) {
-    return Card(
-      color: const Color(0xFF121824),
-      margin: const EdgeInsets.only(bottom: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: isProfit ? const Color(0x2200E676) : const Color(0x22FF5252),
-          child: Icon(
-            isProfit ? Icons.trending_up_rounded : Icons.trending_down_rounded,
-            color: isProfit ? const Color(0xFF00E676) : const Color(0xFFFF5252),
-          ),
-        ),
-        title: Text(symbol, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        subtitle: Text('$type • $size', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        trailing: Text(
-          pnl,
-          style: TextStyle(
-            color: isProfit ? const Color(0xFF00E676) : const Color(0xFFFF5252),
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-          ),
-        ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openLogTradeModal,
+        backgroundColor: const Color(0xFF00E676),
+        icon: const Icon(Icons.add, color: Colors.black),
+        label: const Text('Log Trade', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
     );
   }
