@@ -14,9 +14,16 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
   final _lotSizeController = TextEditingController(text: '1.0');
   final _entryPriceController = TextEditingController();
   final _exitPriceController = TextEditingController();
+  final _stopLossController = TextEditingController();
+  final _takeProfitController = TextEditingController();
   final _pnlController = TextEditingController(text: '0.00');
+  final _notesController = TextEditingController();
 
   String _tradeType = 'BUY';
+  String _session = 'London';
+  String _outcome = 'WIN';
+
+  final List<String> _sessions = ['London', 'New York', 'Asian', 'Overlap'];
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +47,7 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Log New Trade',
+                  'Log Detailed Trade',
                   style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
@@ -49,18 +56,39 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // Symbol Input
-            TextField(
-              controller: _symbolController,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: 'Pair / Symbol (e.g. EURUSD, XAUUSD)',
-                labelStyle: TextStyle(color: Colors.grey),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
-              ),
+            // Pair & Session Row
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _symbolController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Pair / Symbol',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _session,
+                    dropdownColor: const Color(0xFF1E2638),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Trading Session',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                    ),
+                    items: _sessions.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                    onChanged: (val) => setState(() => _session = val!),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
 
@@ -90,27 +118,115 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
             ),
             const SizedBox(height: 12),
 
-            // Lot Size Input
-            TextField(
-              controller: _lotSizeController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: 'Lot Size',
-                labelStyle: TextStyle(color: Colors.grey),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
-              ),
+            // Lot Size & PnL Row
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _lotSizeController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Lot Size',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    controller: _pnlController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Net Profit / Loss (\$)',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
 
-            // PnL Input
+            // Entry & Exit Price Row
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _entryPriceController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Entry Price',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    controller: _exitPriceController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Exit Price',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Stop Loss & Take Profit Row
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _stopLossController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Stop Loss (SL)',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    controller: _takeProfitController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Take Profit (TP)',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Trade Notes / Strategy Setup
             TextField(
-              controller: _pnlController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+              controller: _notesController,
+              maxLines: 2,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
-                labelText: 'Profit / Loss (\$)',
+                labelText: 'Strategy / Trade Setup Notes',
                 labelStyle: TextStyle(color: Colors.grey),
                 enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
                 focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
@@ -118,24 +234,29 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
             ),
             const SizedBox(height: 24),
 
-            // Save Trade Button
+            // Submit Button
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00E676),
                 minimumSize: const Size.fromHeight(48),
               ),
               onPressed: () {
-                final double pnl = double.tryParse(_pnlController.text) ?? 0.0;
                 widget.onTradeAdded({
                   'symbol': _symbolController.text,
                   'type': _tradeType,
+                  'session': _session,
                   'lot': double.tryParse(_lotSizeController.text) ?? 1.0,
-                  'pnl': pnl,
+                  'pnl': double.tryParse(_pnlController.text) ?? 0.0,
+                  'entry': double.tryParse(_entryPriceController.text),
+                  'exit': double.tryParse(_exitPriceController.text),
+                  'sl': double.tryParse(_stopLossController.text),
+                  'tp': double.tryParse(_takeProfitController.text),
+                  'notes': _notesController.text,
                   'date': DateTime.now().toString().split(' ')[0],
                 });
                 Navigator.pop(context);
               },
-              child: const Text('Save Trade', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              child: const Text('Save Detailed Trade', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
