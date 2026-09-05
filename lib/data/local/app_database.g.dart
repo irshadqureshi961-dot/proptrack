@@ -6,10 +6,59 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
 
   @override
-  Iterable<TableInfo<Table, Object?>> get allTables => [];
+  Iterable<TableInfo<Table, Object?>> get allTables => [accounts, trades];
 
-  dynamic get accounts => throw UnimplementedError();
-  dynamic get trades => throw UnimplementedError();
+  $AccountsTable get accounts => $AccountsTable(this);
+  $TradesTable get trades => $TradesTable(this);
+}
+
+class $AccountsTable extends Table with TableInfo {
+  @override
+  final GeneratedDatabase database;
+  final String? tableAs;
+  $AccountsTable(this.database, [this.tableAs]);
+
+  @override
+  String get actualTableName => 'accounts';
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+
+  GeneratedColumn<String> get id => GeneratedColumn<String>('id', actualTableName, false, type: DriftSqlType.string);
+
+  @override
+  List<GeneratedColumn> get $columns => [id];
+
+  @override
+  String get aliasedName => tableAs ?? actualTableName;
+
+  @override
+  $AccountsTable createAlias(String alias) => $AccountsTable(database, alias);
+}
+
+class $TradesTable extends Table with TableInfo {
+  @override
+  final GeneratedDatabase database;
+  final String? tableAs;
+  $TradesTable(this.database, [this.tableAs]);
+
+  @override
+  String get actualTableName => 'trades';
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+
+  GeneratedColumn<String> get id => GeneratedColumn<String>('id', actualTableName, false, type: DriftSqlType.string);
+  GeneratedColumn<String> get accountId => GeneratedColumn<String>('account_id', actualTableName, false, type: DriftSqlType.string);
+
+  @override
+  List<GeneratedColumn> get $columns => [id, accountId];
+
+  @override
+  String get aliasedName => tableAs ?? actualTableName;
+
+  @override
+  $TradesTable createAlias(String alias) => $TradesTable(database, alias);
 }
 
 class Account {
@@ -40,6 +89,8 @@ class Trade {
   final String id;
   final String accountId;
   final String type;
+  final String symbol;
+  final double lotSize;
   final double amount;
   final double pnl;
 
@@ -47,15 +98,27 @@ class Trade {
     required this.id,
     required this.accountId,
     required this.type,
+    this.symbol = 'EURUSD',
+    this.lotSize = 1.0,
     required this.amount,
     this.pnl = 0.0,
   });
 }
 
 class AccountsCompanion {
-  const AccountsCompanion();
+  final Value<String> id;
+  final Value<double> currentBalance;
+
+  const AccountsCompanion({
+    this.id = const Value.absent(),
+    this.currentBalance = const Value.absent(),
+  });
 }
 
 class TradesCompanion {
-  const TradesCompanion();
+  final Value<String> id;
+
+  const TradesCompanion({
+    this.id = const Value.absent(),
+  });
 }
