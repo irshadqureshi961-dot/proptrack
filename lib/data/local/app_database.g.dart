@@ -12,7 +12,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $TradesTable get trades => $TradesTable(this);
 }
 
-class $AccountsTable extends Table with TableInfo {
+class $AccountsTable extends Table with TableInfo<$AccountsTable, Account> {
   @override
   final GeneratedDatabase database;
   final String? tableAs;
@@ -34,9 +34,14 @@ class $AccountsTable extends Table with TableInfo {
 
   @override
   $AccountsTable createAlias(String alias) => $AccountsTable(database, alias);
+
+  @override
+  Account map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return Account(id: '', name: '');
+  }
 }
 
-class $TradesTable extends Table with TableInfo {
+class $TradesTable extends Table with TableInfo<$TradesTable, Trade> {
   @override
   final GeneratedDatabase database;
   final String? tableAs;
@@ -59,6 +64,11 @@ class $TradesTable extends Table with TableInfo {
 
   @override
   $TradesTable createAlias(String alias) => $TradesTable(database, alias);
+
+  @override
+  Trade map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return Trade(id: '', accountId: '', type: '', amount: 0);
+  }
 }
 
 class Account {
@@ -105,7 +115,7 @@ class Trade {
   });
 }
 
-class AccountsCompanion {
+class AccountsCompanion extends UpdateCompanion<Account> {
   final Value<String> id;
   final Value<double> currentBalance;
 
@@ -115,7 +125,7 @@ class AccountsCompanion {
   });
 }
 
-class TradesCompanion {
+class TradesCompanion extends UpdateCompanion<Trade> {
   final Value<String> id;
 
   const TradesCompanion({
