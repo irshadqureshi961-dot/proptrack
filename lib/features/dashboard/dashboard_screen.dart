@@ -21,7 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             Text(
-              'FTMO $100K Challenge',
+              'FTMO \$100K Challenge',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             Text(
