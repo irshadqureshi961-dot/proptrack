@@ -118,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Center(child: CircularProgressIndicator(color: Color(0xFF00E676)))
               else
                 Column(
-                  stretch: true,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ElevatedButton(
                       onPressed: _handleSignIn,
