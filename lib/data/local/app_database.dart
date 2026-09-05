@@ -1,4 +1,5 @@
 import 'package:drift/native.dart;
+import 'package:drift/native.dart;
 import 'package:drift/drift.dart';
 
 part 'app_database.g.dart';

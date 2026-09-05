@@ -19,6 +19,9 @@ class $AccountsTable extends Table with TableInfo<$AccountsTable, Account> {
   $AccountsTable(this.database, [this.tableAs]);
 
   @override
+  DatabaseConnectionUser get attachedDatabase => database;
+
+  @override
   String get actualTableName => 'accounts';
 
   @override
@@ -46,6 +49,9 @@ class $TradesTable extends Table with TableInfo<$TradesTable, Trade> {
   final GeneratedDatabase database;
   final String? tableAs;
   $TradesTable(this.database, [this.tableAs]);
+
+  @override
+  DatabaseConnectionUser get attachedDatabase => database;
 
   @override
   String get actualTableName => 'trades';
@@ -103,6 +109,7 @@ class Trade {
   final double lotSize;
   final double amount;
   final double pnl;
+  final DateTime? closedAt;
 
   Trade({
     required this.id,
@@ -112,6 +119,7 @@ class Trade {
     this.lotSize = 1.0,
     required this.amount,
     this.pnl = 0.0,
+    this.closedAt,
   });
 }
 
@@ -150,6 +158,7 @@ class TradesCompanion extends UpdateCompanion<Trade> {
   final Value<double> lotSize;
   final Value<double> amount;
   final Value<double> pnl;
+  final Value<DateTime?> closedAt;
 
   const TradesCompanion({
     this.id = const Value.absent(),
@@ -159,6 +168,7 @@ class TradesCompanion extends UpdateCompanion<Trade> {
     this.lotSize = const Value.absent(),
     this.amount = const Value.absent(),
     this.pnl = const Value.absent(),
+    this.closedAt = const Value.absent(),
   });
 
   @override
