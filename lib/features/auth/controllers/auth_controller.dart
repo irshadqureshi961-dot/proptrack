@@ -32,7 +32,7 @@ class AuthController {
     }
   }
 
-  static Future<void> signIn({
+  static Future<bool> signIn({
     required BuildContext context,
     required String email,
     required String password,
@@ -43,9 +43,7 @@ class AuthController {
         password: password,
       );
       if (context.mounted && response.user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful!')),
-        );
+        return true;
       }
     } on AuthException catch (e) {
       if (context.mounted) {
@@ -60,5 +58,6 @@ class AuthController {
         );
       }
     }
+    return false;
   }
 }

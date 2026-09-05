@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
+import '../../dashboard/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,12 +23,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleSignIn() async {
     setState(() => _isLoading = true);
-    await AuthController.signIn(
+    final success = await AuthController.signIn(
       context: context,
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
     );
-    if (mounted) setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+      if (success) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        );
+      }
+    }
   }
 
   Future<void> _handleSignUp() async {
@@ -43,59 +51,102 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF0B0E14),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'WELCOME\nTO',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              const Icon(
+                Icons.show_chart_rounded,
+                size: 64,
+                color: Color(0xFF00E676),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               const Text(
                 'PropTrack',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.teal),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.2,
+                ),
               ),
-              const SizedBox(height: 32),
+              const Text(
+                'Prop Firm Analytics & Risk Management',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 40),
               TextField(
                 controller: _emailController,
-                decoration: const InputDecoration(
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
                   labelText: 'Email',
-                  prefixIcon: Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(),
+                  labelStyle: const TextStyle(color: Colors.grey),
+                  prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF00E676)),
+                  filled: true,
+                  fillColor: const Color(0xFF121824),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(),
+                  labelStyle: const TextStyle(color: Colors.grey),
+                  prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF00E676)),
+                  filled: true,
+                  fillColor: const Color(0xFF121824),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               if (_isLoading)
-                const CircularProgressIndicator()
+                const Center(child: CircularProgressIndicator(color: Color(0xFF00E676)))
               else
-                Row(
+                Column(
+                  stretch: true,
                   children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _handleSignIn,
-                        child: const Text('Login'),
+                    ElevatedButton(
+                      onPressed: _handleSignIn,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00E676),
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Login',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _handleSignUp,
-                        child: const Text('Signup'),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: _handleSignUp,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF00E676),
+                        side: const BorderSide(color: Color(0xFF00E676)),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
+                      child: const Text('Create Account'),
                     ),
                   ],
                 ),
