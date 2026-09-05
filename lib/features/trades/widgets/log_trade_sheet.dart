@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 class LogTradeSheet extends StatefulWidget {
   final Function(Map<String, dynamic>) onTradeAdded;
 
-  const LogTradeSheet({super.key, required onTradeAdded}) : _onTradeAdded = onTradeAdded;
-
-  final Function(Map<String, dynamic>) _onTradeAdded;
+  const LogTradeSheet({super.key, required this.onTradeAdded});
 
   @override
   State<LogTradeSheet> createState() => _LogTradeSheetState();
@@ -34,7 +32,7 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
 
     if (symbol.isEmpty || lots.isEmpty) return;
 
-    widget._onTradeAdded({
+    widget.onTradeAdded({
       'symbol': symbol,
       'type': _tradeType,
       'size': '$lots Lots',
@@ -121,7 +119,7 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
                   keyboardType: TextInputType.number,
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
-                    labelText: 'PnL (\USD)',
+                    labelText: 'PnL (\$USD)',
                     labelStyle: TextStyle(color: Colors.grey),
                     filled: true,
                     fillColor: Color(0xFF0B0E14),
