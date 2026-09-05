@@ -153,7 +153,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF00E676),
-        onPressed: () => showModalBottomSheet(context: context, builder: (_) => const LogTradeSheet()),
+        onPressed: () => showModalBottomSheet(
+          context: context,
+          builder: (_) => LogTradeSheet(
+            onTradeAdded: (tradeData) {
+              // Action handled when trade added
+            },
+          ),
+        ),
         icon: const Icon(Icons.add, color: Colors.black),
         label: const Text('Log Trade', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
