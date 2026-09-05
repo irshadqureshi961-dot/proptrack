@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../trades/widgets/log_trade_sheet.dart';
 import '../calculator/calculator_screen.dart';
+import '../journal/journal_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -61,7 +62,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _buildDashboardView(),
           const CalculatorScreen(),
-          const Center(child: Text('Journal Coming Soon', style: TextStyle(color: Colors.white))),
+          JournalScreen(trades: _trades),
         ],
       ),
       floatingActionButton: _selectedIndex == 0
