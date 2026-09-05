@@ -117,18 +117,50 @@ class Trade {
 
 class AccountsCompanion extends UpdateCompanion<Account> {
   final Value<String> id;
+  final Value<String> name;
+  final Value<String> propFirm;
+  final Value<String> accountType;
+  final Value<double> startingBalance;
   final Value<double> currentBalance;
+  final Value<double> profitTarget;
+  final Value<double> dailyLossLimit;
+  final Value<double> maxDrawdown;
 
   const AccountsCompanion({
     this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.propFirm = const Value.absent(),
+    this.accountType = const Value.absent(),
+    this.startingBalance = const Value.absent(),
     this.currentBalance = const Value.absent(),
+    this.profitTarget = const Value.absent(),
+    this.dailyLossLimit = const Value.absent(),
+    this.maxDrawdown = const Value.absent(),
   });
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) => {};
 }
 
 class TradesCompanion extends UpdateCompanion<Trade> {
   final Value<String> id;
+  final Value<String> accountId;
+  final Value<String> type;
+  final Value<String> symbol;
+  final Value<double> lotSize;
+  final Value<double> amount;
+  final Value<double> pnl;
 
   const TradesCompanion({
     this.id = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.symbol = const Value.absent(),
+    this.lotSize = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.pnl = const Value.absent(),
   });
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) => {};
 }
