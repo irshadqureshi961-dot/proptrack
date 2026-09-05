@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../trades/widgets/log_trade_sheet.dart';
+import '../../../core/services/trade_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -12,6 +13,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final double initialBalance = 100000.00;
   final double profitTargetGoal = 10000.00;
   final double maxDailyLossGoal = 5000.00;
+  final TradeService _tradeService = TradeService();
 
   List<Map<String, dynamic>> trades = [
     {'symbol': 'EURUSD', 'type': 'BUY', 'size': '1.5 Lots', 'pnl': '+$620.00', 'isProfit': true, 'numericPnl': 620.00},
@@ -93,6 +95,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 20),
               const Text('Risk & Objectives', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: const Color(0xFF121824), borderRadius: BorderRadius.circular(12)),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Max Daily Loss', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
+                        const Text('\$350 / \$5,000 (0.7%)', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const LinearProgressIndicator(
+                      value: 0.07,
+                      backgroundColor: Color(0xFF1E2638),
+                      color: Color(0xFF00E676),
+                      minHeight: 6,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(color: const Color(0xFF121824), borderRadius: BorderRadius.circular(12)),
