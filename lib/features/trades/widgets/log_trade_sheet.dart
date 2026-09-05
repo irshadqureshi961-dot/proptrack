@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/services/trade_service.dart';
 
 class LogTradeSheet extends StatefulWidget {
   final Function(Map<String, dynamic>) onTradeAdded;
@@ -10,142 +11,167 @@ class LogTradeSheet extends StatefulWidget {
 }
 
 class _LogTradeSheetState extends State<LogTradeSheet> {
-  final _symbolController = TextEditingController(text: 'EURUSD');
-  final _lotsController = TextEditingController(text: '1.0');
-  final _pnlController = TextEditingController(text: '250.00');
+  final _symbolController = TextEditingController();
+  final _lotSizeController = TextEditingController();
+  final _pnlController = TextEditingController();
+  final _tradeService = TradeService();
+  
   String _tradeType = 'BUY';
   bool _isProfit = true;
+  bool _isSubmitting = false;
 
-  @override
-  void dispose() {
-    _symbolController.dispose();
-    _lotsController.dispose();
-    _pnlController.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
+  Future<void> _submitTrade() async {
     final symbol = _symbolController.text.trim().toUpperCase();
-    final lots = _lotsController.text.trim();
+    final lotSize = double.tryParse(_lotSizeController.text.trim()) ?? 0.0;
     final rawPnl = double.tryParse(_pnlController.text.trim()) ?? 0.0;
-    final finalPnl = _isProfit ? rawPnl : -rawPnl;
 
-    if (symbol.isEmpty || lots.isEmpty) return;
+    if (symbol.isEmpty || lotSize <= 0) return;
+
+    final numericPnl = _isProfit ? rawPnl.abs() : -rawPnl.abs();
+
+    setState(() => _isSubmitting = true);
+
+    // Persist to Supabase
+    await _tradeService.logTrade(
+      symbol: symbol,
+      type: _tradeType,
+      lotSize: lotSize,
+      pnl: numericPnl,
+    );
+
+    final formattedPnl = '${numericPnl >= 0 ? '+$' : '-$'}${numericPnl.abs().toStringAsFixed(2)}';
 
     widget.onTradeAdded({
       'symbol': symbol,
       'type': _tradeType,
-      'size': '$lots Lots',
-      'pnl': '${finalPnl >= 0 ? '+\$' : '-\$'}${finalPnl.abs().toStringAsFixed(2)}',
+      'size': '$lotSize Lots',
+      'pnl': formattedPnl,
       'isProfit': _isProfit,
-      'numericPnl': finalPnl,
+      'numericPnl': numericPnl,
     });
 
-    Navigator.of(context).pop();
+    if (mounted) {
+      setState(() => _isSubmitting = false);
+      Navigator.pop(context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: EdgeInsets.only(
-        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        top: 20,
         left: 20,
         right: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF121824),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Log Executed Trade',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          const SizedBox(height: 20),
-          Row(
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF121824),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: ChoiceChip(
-                  label: const Center(child: Text('BUY')),
-                  selected: _tradeType == 'BUY',
-                  selectedColor: const Color(0xFF00E676),
-                  onSelected: (val) => setState(() => _tradeType = 'BUY'),
+              const Text(
+                'Log New Trade',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _symbolController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Symbol (e.g. EURUSD, XAUUSD)',
+                  labelStyle: TextStyle(color: Colors.grey),
+                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF1E2638))),
+                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ChoiceChip(
-                  label: const Center(child: Text('SELL')),
-                  selected: _tradeType == 'SELL',
-                  selectedColor: const Color(0xFFFF5252),
-                  onSelected: (val) => setState(() => _tradeType = 'SELL'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _symbolController,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-              labelText: 'Pair / Instrument',
-              labelStyle: TextStyle(color: Colors.grey),
-              filled: true,
-              fillColor: Color(0xFF0B0E14),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _lotsController,
-            keyboardType: TextInputType.number,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-              labelText: 'Lot Size',
-              labelStyle: TextStyle(color: Colors.grey),
-              filled: true,
-              fillColor: Color(0xFF0B0E14),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _pnlController,
-                  keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    labelText: 'PnL (\$USD)',
-                    labelStyle: TextStyle(color: Colors.grey),
-                    filled: true,
-                    fillColor: Color(0xFF0B0E14),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Center(child: Text('BUY')),
+                      selected: _tradeType == 'BUY',
+                      selectedColor: const Color(0xFF00E676),
+                      onSelected: (val) => setState(() => _tradeType = 'BUY'),
+                    ),
                   ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Center(child: Text('SELL')),
+                      selected: _tradeType == 'SELL',
+                      selectedColor: const Color(0xFFFF5252),
+                      onSelected: (val) => setState(() => _tradeType = 'SELL'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _lotSizeController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Lot Size',
+                  labelStyle: TextStyle(color: Colors.grey),
+                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF1E2638))),
+                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
                 ),
               ),
-              const SizedBox(width: 12),
-              Switch(
-                value: _isProfit,
-                activeColor: const Color(0xFF00E676),
-                inactiveThumbColor: const Color(0xFFFF5252),
-                onChanged: (val) => setState(() => _isProfit = val),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _pnlController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'P&L Amount (\$)',
+                        labelStyle: TextStyle(color: Colors.grey),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF1E2638))),
+                        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilterChip(
+                    label: Text(_isProfit ? 'Profit' : 'Loss'),
+                    selected: _isProfit,
+                    selectedColor: const Color(0x3300E676),
+                    checkmarkColor: const Color(0xFF00E676),
+                    onSelected: (val) => setState(() => _isProfit = val),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _isSubmitting ? null : _submitTrade,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00E676),
+                  padding: const EdgeInsets.vertical(14),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                      )
+                    : const Text(
+                        'Save Trade',
+                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _submit,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00E676),
-              foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-            child: const Text('Save Trade', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
+        ),
       ),
     );
   }
