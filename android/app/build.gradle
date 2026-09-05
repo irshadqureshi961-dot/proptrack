@@ -42,3 +42,7 @@ flutter {
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
 }
+
+android {
+    ndkVersion = "28.2.13676358"
+}
