@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../main.dart';
+import 'package:proptrack/main.dart';
 
 class AuthController {
   // Handle Sign Up
@@ -15,12 +15,10 @@ class AuthController {
         password: password,
       );
 
-      if (context.mounted) {
-        if (response.user != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Account created! Check your email to confirm.')),
-          );
-        }
+      if (context.mounted && response.user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Account created! Check your email to confirm.')),
+        );
       }
     } on AuthException catch (e) {
       if (context.mounted) {
