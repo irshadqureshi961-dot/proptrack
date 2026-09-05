@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../trades/widgets/log_trade_sheet.dart';
+import '../calculator/calculator_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -9,6 +11,29 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
+  double _equity = 104250.00;
+
+  final List<Map<String, dynamic>> _trades = [
+    {'symbol': 'EURUSD', 'type': 'BUY', 'size': '1.5 Lots', 'pnl': '+\$620.00', 'isProfit': true, 'numericPnl': 620.0},
+    {'symbol': 'XAUUSD', 'type': 'SELL', 'size': '0.5 Lots', 'pnl': '-\$180.00', 'isProfit': false, 'numericPnl': -180.0},
+    {'symbol': 'GBPUSD', 'type': 'BUY', 'size': '2.0 Lots', 'pnl': '+\$1,100.00', 'isProfit': true, 'numericPnl': 1100.0},
+  ];
+
+  void _openLogTradeSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => LogTradeSheet(
+        onTradeAdded: (newTrade) {
+          setState(() {
+            _trades.insert(0, newTrade);
+            _equity += (newTrade['numericPnl'] as double);
+          });
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,92 +55,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
+      ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          _buildDashboardView(),
+          const CalculatorScreen(),
+          const Center(child: Text('Journal Coming Soon', style: TextStyle(color: Colors.white))),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Balance Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF121824),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF1E2638)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Current Equity', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                  const SizedBox(height: 6),
-                  const Text(
-                    '\$104,250.00',
-                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildMetricTile('Profit / Loss', '+\$4,250.00 (+4.25%)', const Color(0xFF00E676)),
-                      _buildMetricTile('Max Drawdown', '1.8% / 10.0%', Colors.orangeAccent),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Performance Metrics Header
-            const Text(
-              'Risk & Objectives',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-
-            // Daily Loss Limit Bar
-            _buildProgressBar('Max Daily Loss', 0.35, '\$350 / \$5,000 (0.7%)', const Color(0xFF00E676)),
-            const SizedBox(height: 12),
-            // Profit Target Bar
-            _buildProgressBar('Profit Target', 0.425, '\$4,250 / \$10,000 (42.5%)', const Color(0xFF00E676)),
-
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Recent Trades',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('View All', style: TextStyle(color: Color(0xFF00E676))),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            // Trade List Cards
-            _buildTradeCard('EURUSD', 'BUY', '1.5 Lots', '+\$620.00', true),
-            _buildTradeCard('XAUUSD', 'SELL', '0.5 Lots', '-\$180.00', false),
-            _buildTradeCard('GBPUSD', 'BUY', '2.0 Lots', '+\$1,100.00', true),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        backgroundColor: const Color(0xFF00E676),
-        foregroundColor: Colors.black,
-        icon: const Icon(Icons.add),
-        label: const Text('Log Trade', style: TextStyle(fontWeight: FontWeight.bold)),
-      ),
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton.extended(
+              onPressed: _openLogTradeSheet,
+              backgroundColor: const Color(0xFF00E676),
+              foregroundColor: Colors.black,
+              icon: const Icon(Icons.add),
+              label: const Text('Log Trade', style: TextStyle(fontWeight: FontWeight.bold)),
+            )
+          : null,
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF121824),
         selectedItemColor: const Color(0xFF00E676),
@@ -126,6 +83,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Dashboard'),
           BottomNavigationBarItem(icon: Icon(Icons.calculate_outlined), label: 'Calculator'),
           BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'Journal'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDashboardView() {
+    final netPnl = _equity - 100000.0;
+    final pnlPercent = (netPnl / 100000.0) * 100;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF121824),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF1E2638)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Current Equity', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                const SizedBox(height: 6),
+                Text(
+                  '\$${_equity.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildMetricTile(
+                      'Profit / Loss',
+                      '${netPnl >= 0 ? '+' : ''}\$${netPnl.toStringAsFixed(2)} (${pnlPercent.toStringAsFixed(2)}%)',
+                      netPnl >= 0 ? const Color(0xFF00E676) : const Color(0xFFFF5252),
+                    ),
+                    _buildMetricTile('Max Drawdown', '1.8% / 10.0%', Colors.orangeAccent),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text('Risk & Objectives', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(height: 12),
+          _buildProgressBar('Max Daily Loss', 0.35, '\$350 / \$5,000 (0.7%)', const Color(0xFF00E676)),
+          const SizedBox(height: 12),
+          _buildProgressBar('Profit Target', (netPnl / 10000).clamp(0.0, 1.0), '\$${netPnl.toStringAsFixed(0)} / \$10,000', const Color(0xFF00E676)),
+          const SizedBox(height: 24),
+          const Text('Recent Trades', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(height: 12),
+          ..._trades.map((t) => _buildTradeCard(t['symbol'], t['type'], t['size'], t['pnl'], t['isProfit'])).toList(),
         ],
       ),
     );
