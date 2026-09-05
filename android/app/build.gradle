@@ -5,46 +5,34 @@ plugins {
 }
 
 android {
+    namespace = "com.example.proptrack"
+    compileSdk = 36
     ndkVersion = "28.2.13676358"
-    namespace "com.proptrack"
-    compileSdk 34
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "1.8"
     }
 
     defaultConfig {
-        applicationId "com.proptrack"
-        minSdk 21
-        targetSdk 34
-        versionCode 1
-        versionName "1.0.0"
-        multiDexEnabled true
+        applicationId = "com.example.proptrack"
+        minSdk = 21
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0.0"
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
-            minifyEnabled false
-            shrinkResources false
+            signingConfig = signingConfigs.debug
         }
     }
 }
 
 flutter {
-    source "../.."
-}
-
-dependencies {
-    implementation 'androidx.multidex:multidex:2.0.1'
-}
-
-android {
-    ndkVersion = "28.2.13676358"
-    ndkVersion = "28.2.13676358"
+    source = "../.."
 }
