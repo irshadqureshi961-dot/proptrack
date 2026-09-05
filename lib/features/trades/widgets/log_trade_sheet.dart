@@ -31,7 +31,6 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
 
     setState(() => _isSubmitting = true);
 
-    // Persist to Supabase
     await _tradeService.logTrade(
       symbol: symbol,
       type: _tradeType,
@@ -39,7 +38,7 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
       pnl: numericPnl,
     );
 
-    final formattedPnl = '${numericPnl >= 0 ? '+$' : '-$'}${numericPnl.abs().toStringAsFixed(2)}';
+    final formattedPnl = '${numericPnl >= 0 ? '+\$' : '-\$'}${numericPnl.abs().toStringAsFixed(2)}';
 
     widget.onTradeAdded({
       'symbol': symbol,
@@ -134,7 +133,7 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
-                        labelText: 'P&L Amount (\$)',
+                        labelText: r'P&L Amount ($)',
                         labelStyle: TextStyle(color: Colors.grey),
                         enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF1E2638))),
                         focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E676))),
@@ -156,7 +155,7 @@ class _LogTradeSheetState extends State<LogTradeSheet> {
                 onPressed: _isSubmitting ? null : _submitTrade,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00E676),
-                  padding: const EdgeInsets.vertical(14),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: _isSubmitting
                     ? const SizedBox(
