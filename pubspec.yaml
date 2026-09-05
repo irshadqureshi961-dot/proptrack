@@ -28,6 +28,10 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  fl_chart: ^0.66.0
+  drift: ^2.14.0
+  flutter_riverpod: ^2.5.1
+  google_fonts: ^6.1.0
   flutter:
     sdk: flutter
 
@@ -36,6 +40,12 @@ dependencies:
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
+  drift_dev: ^2.14.0
+  build_runner: ^2.4.8
+  fl_chart: ^0.66.0
+  drift: ^2.14.0
+  flutter_riverpod: ^2.5.1
+  google_fonts: ^6.1.0
   flutter_test:
     sdk: flutter
 

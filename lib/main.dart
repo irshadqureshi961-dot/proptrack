@@ -1,100 +1,84 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'core/theme/app_theme.dart';
+import 'features/auth/login_screen.dart';
+import 'features/dashboard/dashboard_screen.dart';
 
 void main() {
-  runApp(const PropTrackApp());
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.presentError(details);
+      runApp(ErrorApp(error: details.exceptionAsString(), stack: details.stack.toString()));
+    };
+
+    try {
+      runApp(const PropTrackApp());
+    } catch (e, stack) {
+      runApp(ErrorApp(error: e.toString(), stack: stack.toString()));
+    }
+  }, (Object error, StackTrace stack) {
+    runApp(ErrorApp(error: error.toString(), stack: stack.toString()));
+  });
 }
 
-class PropTrackApp extends StatelessWidget {
+class PropTrackApp extends StatefulWidget {
   const PropTrackApp({super.key});
+
+  @override
+  State<PropTrackApp> createState() => _PropTrackAppState();
+}
+
+class _PropTrackAppState extends State<PropTrackApp> {
+  bool _isLoggedIn = false;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PropTrack',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        cardColor: const Color(0xFF1E1E1E),
-        primaryColor: Colors.blueAccent,
-      ),
-      home: const DashboardScreen(),
+      theme: AppTheme.darkTheme,
+      home: _isLoggedIn
+          ? const DashboardScreen()
+          : LoginScreen(
+              onLoginSuccess: () {
+                setState(() {
+                  _isLoggedIn = true;
+                });
+              },
+            ),
     );
   }
 }
 
-class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
-
-  @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
-}
-
-class _DashboardScreenState extends State<DashboardScreen> {
-  double accountBalance = 50000.00;
-  double profitTarget = 5000.00;
-  double dailyLossLimit = 2500.00;
-  double totalPnL = 0.00;
+class ErrorApp extends StatelessWidget {
+  final String error;
+  final String stack;
+  const ErrorApp({super.key, required this.error, required this.stack});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('PropTrack Dashboard'),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildStatCard('Account Balance', '\$${accountBalance.toStringAsFixed(2)}', Colors.white),
-            const SizedBox(height: 12),
-            _buildStatCard('Total PnL', '+\$${totalPnL.toStringAsFixed(2)}', Colors.greenAccent),
-            const SizedBox(height: 12),
-            _buildStatCard('Target Progress', '0.0% (\$${profitTarget.toStringAsFixed(0)} Target)', Colors.blueAccent),
-            const SizedBox(height: 12),
-            _buildStatCard('Daily Loss Limit', '\$${dailyLossLimit.toStringAsFixed(2)}', Colors.redAccent),
-            const SizedBox(height: 24),
-            const Text(
-              'Analytics & Stats',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Column(
+    return MaterialApp(
+      home: Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Win Rate'), Text('0.0% (0 W / 0 L)')]),
-                  Divider(color: Colors.grey),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Profit Factor'), Text('0.00')]),
+                  const Text('RUNTIME ERROR DETECTED', style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  Text(error, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                  const SizedBox(height: 10),
+                  Text(stack, style: const TextStyle(color: Colors.grey, fontSize: 10)),
                 ],
               ),
             ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String title, String value, Color valueColor) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: const TextStyle(color: Colors.grey, fontSize: 14)),
-          Text(value, style: TextStyle(color: valueColor, fontSize: 16, fontWeight: FontWeight.bold)),
-        ],
       ),
     );
   }
