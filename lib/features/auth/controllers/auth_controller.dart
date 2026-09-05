@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:proptrack/main.dart';
 
 class AuthController {
-  // Handle Sign Up
   static Future<void> signUp({
     required BuildContext context,
     required String email,
     required String password,
   }) async {
     try {
-      final response = await supabase.auth.signUp(
+      final response = await Supabase.instance.client.auth.signUp(
         email: email,
         password: password,
       );
-
       if (context.mounted && response.user != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Account created! Check your email to confirm.')),
@@ -35,18 +32,16 @@ class AuthController {
     }
   }
 
-  // Handle Log In
   static Future<void> signIn({
     required BuildContext context,
     required String email,
     required String password,
   }) async {
     try {
-      final response = await supabase.auth.signInWithPassword(
+      final response = await Supabase.instance.client.auth.signInWithPassword(
         email: email,
         password: password,
       );
-
       if (context.mounted && response.user != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful!')),
